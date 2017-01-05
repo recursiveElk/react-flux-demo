@@ -15,6 +15,7 @@ var config = {
     paths: {
         html: './src/*.html',
         js: './src/**/*.js',
+        images: './src/images/*',
         dist: './dist',
         css: [
             'node_modules/bootstrap/dist/css/bootstrap.min.css',
@@ -58,6 +59,17 @@ gulp.task('js',function() {
     .pipe(connect.reload());
 });
 
+//Migrates images to dist folder
+gulp.task('images', function() {
+    gulp.src(config.paths.images)
+        .pipe(gulp.dest(config.paths.dist +'/images'))
+        .pipe(connect.reload());
+
+    //moves favicon.ico to website source
+    gulp.src('./src/favicon.ico')
+        .pipe(gulp.dest(config.paths.dist));
+});
+
 //Bundles ES6 js to one file  (remember to switch between es6js and js in defaults list)
 gulp.task('es6js',function() {
     browserify(config.paths.mainJs)
@@ -90,4 +102,4 @@ gulp.task('watch', function() {
 });
 
 //Run all default tasks for development purposes
-gulp.task('default', ['html', 'js', 'css', 'lint', 'connect', 'watch']);
+gulp.task('default', ['html', 'js', 'css', 'images', 'lint', 'connect', 'watch']);
