@@ -58,6 +58,17 @@ gulp.task('js',function() {
     .pipe(connect.reload());
 });
 
+//Bundles ES6 js to one file  (remember to switch between es6js and js in defaults list)
+gulp.task('es6js',function() {
+    browserify(config.paths.mainJs)
+    .transform('babelify', {presets: ['es2015', 'react']})
+    .bundle()
+    .on('error', console.error.bind(console))
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest(config.paths.dist + '/scripts'))
+    .pipe(connect.reload());
+});
+
 //Bundles css to one file
 gulp.task('css', function() {
     gulp.src(config.paths.css)

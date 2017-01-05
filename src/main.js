@@ -1,8 +1,6 @@
-//import React from 'react';
-//import ReactDOM from 'react-dom';
+$ = jQuery = require('jquery');
+var React = require('react');
+var Home = require('./components/homePage');
 
-$ = jQuery = require("jquery"); //Bootstrap expects jquery to be globally declared.
+React.render(<Home />, document.getElementById('app'));
 
-var App = console.log("helloworld browserify");
-
-module.exports = App;
