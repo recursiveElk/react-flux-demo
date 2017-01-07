@@ -29771,7 +29771,7 @@ var Home = React.createClass({displayName: "Home",
     render: function() {
         return (
             React.createElement("div", {className: "jumbotron"}, 
-                React.createElement("h1", null, "Pluralsight Administration"), 
+                React.createElement("h1", null, "Pluralsight Learning App"), 
                 React.createElement("p", null, " React, React Router, Flux for ultra-responsive web apps ")
             )
         );
