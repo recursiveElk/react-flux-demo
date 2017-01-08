@@ -37,8 +37,8 @@ var Authors = React.createClass({
                     </tbody>
                 </table>
             </div>
-        )
-    },
+        );
+    }
 });
 
 module.exports = Authors;

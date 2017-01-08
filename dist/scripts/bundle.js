@@ -46944,8 +46944,8 @@ var Authors = React.createClass({displayName: "Authors",
                     )
                 )
             )
-        )
-    },
+        );
+    }
 });
 
 module.exports = Authors;
