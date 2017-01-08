@@ -9,6 +9,7 @@ var Header = React.createClass({
                     <a href="/"><img className="navbar-brand" src="images/brand.ico"/></a>
                     <ul className="nav navbar-nav">
                         <li><a href="/">Home</a></li>
+                        <li><a href="/#authors">Authors</a></li>
                         <li><a href="/#about">About</a></li> 
                     </ul> 
                 </div>
