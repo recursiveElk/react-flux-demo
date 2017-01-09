@@ -5,7 +5,7 @@ $ = jQuery = require('jquery');
 var About = React.createClass({
     render: function() {
         return (
-            <div className="jumbotron">
+            <div className="container">
                 <h1>About</h1>
                 <p> This application uses the following technologies: </p> 
                     <ul>
