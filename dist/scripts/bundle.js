@@ -49959,6 +49959,27 @@ module.exports = {
 },{}],203:[function(require,module,exports){
 "use strict";
 var React = require('react');
+var Link = require('react-router').Link;
+
+var NotFoundPage = React.createClass({displayName: "NotFoundPage",
+    render: function() {
+        return (
+            React.createElement("div", {className: "container"}, 
+                React.createElement("h1", {className: "text-center"}, "404: Page Not Found"), 
+                React.createElement("div", {className: "text-center"}, 
+                    React.createElement("p", null, " Nothing to see here, move along. "), 
+                    React.createElement("button", {className: "btn "}, React.createElement(Link, {to: "app"}, " Back Home "))
+                )
+            )
+        );
+    }
+});
+
+module.exports = NotFoundPage;
+
+},{"react":200,"react-router":30}],204:[function(require,module,exports){
+"use strict";
+var React = require('react');
 $ = jQuery = require('jquery');
 
 var AboutPage = React.createClass({displayName: "AboutPage",
@@ -49983,7 +50004,7 @@ var AboutPage = React.createClass({displayName: "AboutPage",
 
 module.exports = AboutPage;
 
-},{"jquery":3,"react":200}],204:[function(require,module,exports){
+},{"jquery":3,"react":200}],205:[function(require,module,exports){
 //"use strict";
 
 $ = jQuery = require('jquery');
@@ -50006,7 +50027,7 @@ var App = React.createClass({displayName: "App",
 
 module.exports = App;
 
-},{"./common/header":207,"jquery":3,"react":200,"react-router":30}],205:[function(require,module,exports){
+},{"./common/header":208,"jquery":3,"react":200,"react-router":30}],206:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -50044,7 +50065,7 @@ var AuthorList = React.createClass({displayName: "AuthorList",
 
 module.exports = AuthorList;
 
-},{"react":200}],206:[function(require,module,exports){
+},{"react":200}],207:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -50076,7 +50097,7 @@ var AuthorPage = React.createClass({displayName: "AuthorPage",
 
 module.exports = AuthorPage;
 
-},{"../../api/authorApi":201,"./authorList":205,"react":200}],207:[function(require,module,exports){
+},{"../../api/authorApi":201,"./authorList":206,"react":200}],208:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -50102,7 +50123,7 @@ var Header = React.createClass({displayName: "Header",
 
 module.exports = Header;
 
-},{"react":200,"react-router":30}],208:[function(require,module,exports){
+},{"react":200,"react-router":30}],209:[function(require,module,exports){
 "use strict";
 var React = require('react');
 $ = jQuery = require('jquery');
@@ -50127,7 +50148,7 @@ var ExtraPage = React.createClass({displayName: "ExtraPage",
 
 module.exports = ExtraPage;
 
-},{"jquery":3,"react":200}],209:[function(require,module,exports){
+},{"jquery":3,"react":200}],210:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -50147,33 +50168,35 @@ var Home = React.createClass({displayName: "Home",
 
 module.exports = Home;
 
-},{"react":200,"react-router":30}],210:[function(require,module,exports){
+},{"react":200,"react-router":30}],211:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
 var routes = require('./routes');
 
-Router.run(routes, function(Handler) {
+Router.run(routes, /*Router.HistoryLocation,*/function(Handler) {
     React.render(React.createElement(Handler, null), document.getElementById('app'));
 });
 
-},{"./routes":211,"react":200,"react-router":30}],211:[function(require,module,exports){
+},{"./routes":212,"react":200,"react-router":30}],212:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
 var Router = require('react-router');
 var DefaultRoute = Router.DefaultRoute;
 var Route = Router.Route;
+var NotFoundRoute = Router.NotFoundRoute;
 
 var routes = (
     React.createElement(Route, {name: "app", path: "/", handler: require('./components/app')}, 
         React.createElement(DefaultRoute, {handler: require('./components/homePage')}), 
         React.createElement(Route, {name: "authors", handler: require('./components/authors/authorPage')}), 
         React.createElement(Route, {name: "about", handler: require('./components/about/aboutPage')}), 
-        React.createElement(Route, {name: "extra", handler: require('./components/extra/extraPage')})
+        React.createElement(Route, {name: "extra", handler: require('./components/extra/extraPage')}), 
+        React.createElement(NotFoundRoute, {handler: require('./components/404Page')})
     )
 );
 
 module.exports = routes;
 
-},{"./components/about/aboutPage":203,"./components/app":204,"./components/authors/authorPage":206,"./components/extra/extraPage":208,"./components/homePage":209,"react":200,"react-router":30}]},{},[210]);
+},{"./components/404Page":203,"./components/about/aboutPage":204,"./components/app":205,"./components/authors/authorPage":207,"./components/extra/extraPage":209,"./components/homePage":210,"react":200,"react-router":30}]},{},[211]);
