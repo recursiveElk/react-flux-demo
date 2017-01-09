@@ -2,7 +2,7 @@
 var React = require('react');
 $ = jQuery = require('jquery');
 
-var About = React.createClass({
+var AboutPage = React.createClass({
     render: function() {
         return (
             <div className="container">
@@ -22,4 +22,4 @@ var About = React.createClass({
     }
 });
 
-module.exports = About;
+module.exports = AboutPage;
