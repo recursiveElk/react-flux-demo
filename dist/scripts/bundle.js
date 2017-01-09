@@ -50079,18 +50079,20 @@ module.exports = AuthorPage;
 },{"../../api/authorApi":201,"./authorList":205,"react":200}],207:[function(require,module,exports){
 "use strict";
 var React = require('react');
+var Router = require('react-router');
+var Link = Router.Link;
 
 var Header = React.createClass({displayName: "Header",
     render: function() {
         return (
             React.createElement("nav", {className: "navbar navbar-default"}, 
                 React.createElement("div", {className: "container-fluid"}, 
-                    React.createElement("a", {href: "/"}, React.createElement("img", {className: "navbar-brand", src: "images/brand.ico"})), 
+                    React.createElement(Link, {to: "app"}, React.createElement("img", {className: "navbar-brand", src: "images/brand.ico"})), 
                     React.createElement("ul", {className: "nav navbar-nav"}, 
-                        React.createElement("li", null, React.createElement("a", {href: "/"}, "Home")), 
-                        React.createElement("li", null, React.createElement("a", {href: "/#authors"}, "Authors")), 
-                        React.createElement("li", null, React.createElement("a", {href: "/#about"}, "About")), 
-                        React.createElement("li", null, React.createElement("a", {href: "/#extra"}, "Extra"))
+                        React.createElement("li", null, React.createElement(Link, {to: "app"}, "Home")), 
+                        React.createElement("li", null, React.createElement(Link, {to: "authors"}, "Authors")), 
+                        React.createElement("li", null, React.createElement(Link, {to: "about"}, "About")), 
+                        React.createElement("li", null, React.createElement(Link, {to: "extra"}, "Extra"))
                     )
                 )
             )
@@ -50100,7 +50102,7 @@ var Header = React.createClass({displayName: "Header",
 
 module.exports = Header;
 
-},{"react":200}],208:[function(require,module,exports){
+},{"react":200,"react-router":30}],208:[function(require,module,exports){
 "use strict";
 var React = require('react');
 $ = jQuery = require('jquery');
@@ -50111,15 +50113,11 @@ var ExtraPage = React.createClass({displayName: "ExtraPage",
             React.createElement("div", {className: "container"}, 
                 React.createElement("h1", {className: "text-center"}, "Dungeons and Dragons Character Sheet"), 
                 React.createElement("div", {className: "row"}, 
-                    React.createElement("div", {className: ".col-md-6"}, 
-                        React.createElement("div", {className: "thumbnail"}, 
-                            React.createElement("button", {href: ""}, "Login to Existing Character")
-                        )
+                    React.createElement("div", {className: ".col-xs-6"}, 
+                        React.createElement("button", {className: "container-fluid btn btn-primary btn-lg btn-block", href: ""}, "Login to Existing Character")
                     ), 
-                    React.createElement("div", {className: ".col-md-6"}, 
-                        React.createElement("div", {className: "thumbnail"}, 
-                            React.createElement("button", {href: ""}, "Create new Character")
-                        )
+                    React.createElement("div", {className: ".col-xs-6"}, 
+                        React.createElement("button", {className: "container-fluid btn btn-primary btn-lg btn-block", href: ""}, "Create new Character")
                     )
                 )
             )
@@ -50132,13 +50130,16 @@ module.exports = ExtraPage;
 },{"jquery":3,"react":200}],209:[function(require,module,exports){
 "use strict";
 var React = require('react');
+var Router = require('react-router');
+var Link = Router.Link;
 
 var Home = React.createClass({displayName: "Home",
     render: function() {
         return (
             React.createElement("div", {className: "jumbotron"}, 
                 React.createElement("h1", null, "Pluralsight Learning App"), 
-                React.createElement("p", null, " React, React Router, Flux for ultra-responsive web apps ")
+                React.createElement("p", null, " React, React Router, Flux for ultra-responsive web apps "), 
+                React.createElement(Link, {to: "about", className: "btn btn-primary btn-lg"}, "Learn More")
             )
         );
     }
@@ -50146,7 +50147,7 @@ var Home = React.createClass({displayName: "Home",
 
 module.exports = Home;
 
-},{"react":200}],210:[function(require,module,exports){
+},{"react":200,"react-router":30}],210:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
