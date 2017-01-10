@@ -1,6 +1,7 @@
 "use strict";
 
 var React = require('react');
+var HelperFuncs = require('../common/helperFunctions');
 
 var AuthorList = React.createClass({
     propTypes: {
@@ -12,7 +13,7 @@ var AuthorList = React.createClass({
             return (
                 <tr key={author.id}>
                     <td><a href = {"/#authors/" + author.id}>{author.id}</a></td>
-                    <td>{author.firstName} {author.lastName}</td>
+                    <td>{author.firstName.capitalize()} {author.lastName.capitalize()}</td>
                 </tr>
             );
         };
