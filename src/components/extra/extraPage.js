@@ -12,9 +12,6 @@ var ExtraPage = React.createClass({
                         <button className="charButton btn btn-primary btn-lg" href="">Login to Existing Character</button>
                         <button className="charButton btn btn-primary btn-lg" href="">Create new Character</button>
                     </div>
-                    <div>
-                    Hello
-                    </div>
                 </div>   
             </div>
         );

@@ -25,7 +25,7 @@ var config = {
         ],
         mainJs: './src/main.js',
     }
-}
+};
 
 //Start a local dev server
 gulp.task('connect', function() { 
@@ -35,7 +35,7 @@ gulp.task('connect', function() {
         base: config.devBaseUrl,
         livereload: true
     });
-})
+});
 
 //Open started dev server in new browser tab
 gulp.task('open', ['connect'], function() {
