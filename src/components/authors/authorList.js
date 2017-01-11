@@ -1,7 +1,9 @@
 "use strict";
 
 var React = require('react');
-var HelperFuncs = require('../common/helperFunctions');
+var Router = require('react-router');
+var Link = Router.Link;
+var Helper = require('../common/helperFunctions');
 
 var AuthorList = React.createClass({
     propTypes: {
@@ -12,8 +14,8 @@ var AuthorList = React.createClass({
         var createAuthorRow = function(author) {
             return (
                 <tr key={author.id}>
-                    <td><a href = {"/#authors/" + author.id}>{author.id}</a></td>
-                    <td>{author.firstName.capitalize()} {author.lastName.capitalize()}</td>
+                    <td><Link to= "manageAuthor" params={{id: author.id}}>{author.id}</Link></td>
+                    <td>{Helper.capitalize(author.firstName)} {Helper.capitalize(author.lastName)}</td>
                 </tr>
             );
         };

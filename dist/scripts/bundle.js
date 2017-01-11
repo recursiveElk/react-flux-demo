@@ -50410,6 +50410,13 @@ var React = require('react');
 var Input = require('../common/textInput');
 
 var AuthorForm = React.createClass({displayName: "AuthorForm",
+    propTypes: {
+        author: React.PropTypes.object.isRequired,
+        onSave: React.PropTypes.func.isRequired,
+        onChange: React.PropTypes.func.isRequired,
+        errors: React.PropTypes.object,
+    },
+    
     render: function() {
         return (
             React.createElement("form", null, 
@@ -50417,12 +50424,14 @@ var AuthorForm = React.createClass({displayName: "AuthorForm",
                     name: "firstName", 
                     label: "First Name", 
                     value: this.props.author.firstName, 
-                    onChange: this.props.onChange}), 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.firstName}), 
                 React.createElement(Input, {
                     name: "lastName", 
                     label: "Last Name", 
                     value: this.props.author.lastName, 
-                    onChange: this.props.onChange}), 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.lastName}), 
                 React.createElement("input", {type: "submit", value: "Save", onClick: this.props.onSave, className: "btn btn-default"})
             )
         );
@@ -50435,7 +50444,9 @@ module.exports = AuthorForm;
 "use strict";
 
 var React = require('react');
-var HelperFuncs = require('../common/helperFunctions');
+var Router = require('react-router');
+var Link = Router.Link;
+var Helper = require('../common/helperFunctions');
 
 var AuthorList = React.createClass({displayName: "AuthorList",
     propTypes: {
@@ -50446,8 +50457,8 @@ var AuthorList = React.createClass({displayName: "AuthorList",
         var createAuthorRow = function(author) {
             return (
                 React.createElement("tr", {key: author.id}, 
-                    React.createElement("td", null, React.createElement("a", {href: "/#authors/" + author.id}, author.id)), 
-                    React.createElement("td", null, author.firstName.capitalize(), " ", author.lastName.capitalize())
+                    React.createElement("td", null, React.createElement(Link, {to: "manageAuthor", params: {id: author.id}}, author.id)), 
+                    React.createElement("td", null, Helper.capitalize(author.firstName), " ", Helper.capitalize(author.lastName))
                 )
             );
         };
@@ -50470,7 +50481,7 @@ var AuthorList = React.createClass({displayName: "AuthorList",
 
 module.exports = AuthorList;
 
-},{"../common/helperFunctions":212,"react":200}],209:[function(require,module,exports){
+},{"../common/helperFunctions":212,"react":200,"react-router":30}],209:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -50513,29 +50524,86 @@ var Router = require('react-router');
 var AuthorForm = require('./authorForm');
 var AuthorApi = require('../../api/authorApi');
 var toastr = require('toastr');
+var Helper = require('../common/helperFunctions');
+
 
 var ManageAuthorPage = React.createClass({displayName: "ManageAuthorPage",
     mixins: [
         Router.Navigation
     ],
 
+    statics: {
+        willTransitionFrom: function(transition, component) {
+            if (component.state.dirty && !confirm('Leave without saving?')) {
+                transition.abort();
+            }
+        }
+    },
+
     getInitialState: function() {
         return {
-            author: { id: '', firstName: '', lastName: '' }
+            author: { id: '', firstName: '', lastName: '' },
+            errors: {},
+            dirty: false
         };
     },
+
+    componentWillMount: function() {
+        var authorId = this.props.params.id;
+
+        if (authorId) {
+            this.setState({author: AuthorApi.getAuthorById(authorId)});
+        }
+    },
+
     setAuthorState: function(event) {
+        this.setState({dirty: true});
         var field = event.target.name;
         var value = event.target.value;
         this.state.author[field] = value;
         return this.setState({author: this.state.author});
     },
+
+    authorFormIsValid: function() {
+        var formIsValid = true;
+        this.state.errors = {};
+
+        if (this.state.author.firstName.length < 3) {
+            this.state.errors.firstName = 'First Name must be at east 3 characters';
+            formIsValid = false;
+        }
+        if (this.state.author.lastName.length < 3) {
+            this.state.errors.lastName = 'Last Name must be at east 3 characters';
+            formIsValid = false;
+        }
+        
+        if (Helper.hasNumber(this.state.author.firstName)) {
+            this.state.errors.firstName = "Name can't consist of numbers";
+            formIsValid = false;
+        }else if (Helper.hasNumber(this.state.author.lastName)) {
+            this.state.errors.lastName = "Name can't consist of numbers";
+            formIsValid = false;    
+        }
+        
+        this.setState({errors: this.state.errors});
+        return formIsValid;
+    },
+
     saveAuthor: function(event) {
         event.preventDefault();
+
+        if (!this.authorFormIsValid()) {
+            console.log(this.state.errors);
+            return;
+        }
+
         AuthorApi.saveAuthor(this.state.author);
         toastr.success('Author saved');
         this.transitionTo('authors');
+        this.setState({dirty: false});
     },
+
+
     render: function() {
         return (
             React.createElement("div", null, 
@@ -50543,7 +50611,8 @@ var ManageAuthorPage = React.createClass({displayName: "ManageAuthorPage",
                 React.createElement(AuthorForm, {
                     author: this.state.author, 
                     onChange: this.setAuthorState, 
-                    onSave: this.saveAuthor})
+                    onSave: this.saveAuthor, 
+                    errors: this.state.errors})
             )
         );
     }
@@ -50551,7 +50620,7 @@ var ManageAuthorPage = React.createClass({displayName: "ManageAuthorPage",
 
 module.exports = ManageAuthorPage;
 
-},{"../../api/authorApi":202,"./authorForm":207,"react":200,"react-router":30,"toastr":201}],211:[function(require,module,exports){
+},{"../../api/authorApi":202,"../common/helperFunctions":212,"./authorForm":207,"react":200,"react-router":30,"toastr":201}],211:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -50579,10 +50648,16 @@ module.exports = Header;
 
 },{"react":200,"react-router":30}],212:[function(require,module,exports){
 "use strict";
+module.exports = {
+    // Capitalize First Letter of each word in a String
+    capitalize: function(myString) {
+        return myString.charAt(0).toUpperCase() + myString.slice(1);
+    },
 
-// Capitalize First Letter of each word in a String
-String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
+    // Check if a number exists inside a given String
+    hasNumber: function(myString) {
+        return /\d/.test(myString);
+    }
 };
 
 },{}],213:[function(require,module,exports){
@@ -50692,6 +50767,7 @@ var routes = (
         React.createElement(DefaultRoute, {handler: require('./components/homePage')}), 
         React.createElement(Route, {name: "authors", handler: require('./components/authors/authorPage')}), 
         React.createElement(Route, {name: "addAuthor", path: "author", handler: require('./components/authors/manageAuthorPage')}), 
+        React.createElement(Route, {name: "manageAuthor", path: "author/:id", handler: require('./components/authors/manageAuthorPage')}), 
         React.createElement(Route, {name: "about", handler: require('./components/about/aboutPage')}), 
         React.createElement(Route, {name: "extra", handler: require('./components/extra/extraPage')}), 
         React.createElement(NotFoundRoute, {handler: require('./components/404Page')})
