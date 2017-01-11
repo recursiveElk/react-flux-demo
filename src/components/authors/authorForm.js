@@ -18,7 +18,7 @@ var AuthorForm = React.createClass({
                     name="firstName"
                     label="First Name"
                     value={this.props.author.firstName}
-                    onChange={this.props.onChange}
+                    onChange={this.pgitrops.onChange}
                     error={this.props.errors.firstName} />
                 <Input 
                     name="lastName"

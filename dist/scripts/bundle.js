@@ -50485,7 +50485,7 @@ var AuthorForm = React.createClass({displayName: "AuthorForm",
                     name: "firstName", 
                     label: "First Name", 
                     value: this.props.author.firstName, 
-                    onChange: this.props.onChange, 
+                    onChange: this.pgitrops.onChange, 
                     error: this.props.errors.firstName}), 
                 React.createElement(Input, {
                     name: "lastName", 
@@ -50774,6 +50774,9 @@ var ExtraPage = React.createClass({displayName: "ExtraPage",
                     React.createElement("div", {className: "col-sm-12 text-center"}, 
                         React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Login to Existing Character"), 
                         React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Create new Character")
+                    ), 
+                    React.createElement("div", null, 
+                    "Hello"
                     )
                 )
             )
