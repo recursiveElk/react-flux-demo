@@ -95,7 +95,7 @@ var ManageAuthorPage = React.createClass({
         toastr.success('Author saved');
         this.transitionTo('authors');
         this.setState({dirty: false});
-    },
+    }
 });
 
 module.exports = ManageAuthorPage;
