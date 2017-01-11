@@ -21,6 +21,19 @@ var ManageAuthorPage = React.createClass({
         }
     },
 
+    render: function() {
+        return (
+            <div>
+                <h1>Manage Author</h1>
+                <AuthorForm
+                    author={this.state.author}
+                    onChange={this.setAuthorState}
+                    onSave={this.saveAuthor}
+                    errors={this.state.errors}/>
+            </div>
+        );
+    },
+
     getInitialState: function() {
         return {
             author: { id: '', firstName: '', lastName: '' },
@@ -83,20 +96,6 @@ var ManageAuthorPage = React.createClass({
         this.transitionTo('authors');
         this.setState({dirty: false});
     },
-
-
-    render: function() {
-        return (
-            <div>
-                <h1>Manage Author</h1>
-                <AuthorForm
-                    author={this.state.author}
-                    onChange={this.setAuthorState}
-                    onSave={this.saveAuthor}
-                    errors={this.state.errors}/>
-            </div>
-        );
-    }
 });
 
 module.exports = ManageAuthorPage;
