@@ -13,7 +13,7 @@ var Header = React.createClass({
                         <li><Link to="app">Home</Link></li>
                         <li><Link to="authors">Authors</Link></li>
                         <li><Link to="about">About</Link></li> 
-                        <li><Link to="extra">Extra</Link></li> 
+                        <li><Link to="dnd">DnD</Link></li> 
                     </ul> 
                 </div>
             </nav>

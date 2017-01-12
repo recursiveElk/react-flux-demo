@@ -51043,7 +51043,7 @@ var AuthorActions = {
 
 module.exports = AuthorActions;
 
-},{"../api/authorApi":210,"../constants/actionTypes":224,"../dispatcher/appDispatcher":225}],208:[function(require,module,exports){
+},{"../api/authorApi":210,"../constants/actionTypes":227,"../dispatcher/appDispatcher":228}],208:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require('../dispatcher/appDispatcher');
@@ -51063,7 +51063,7 @@ var InitializeActions = {
 
 module.exports = InitializeActions;
 
-},{"../api/authorApi":210,"../constants/actionTypes":224,"../dispatcher/appDispatcher":225}],209:[function(require,module,exports){
+},{"../api/authorApi":210,"../constants/actionTypes":227,"../dispatcher/appDispatcher":228}],209:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require('../dispatcher/appDispatcher');
@@ -51102,7 +51102,7 @@ var AuthorActions = {
 
 module.exports = AuthorActions;
 
-},{"../api/authorApi":210,"../constants/actionTypes":224,"../dispatcher/appDispatcher":225}],210:[function(require,module,exports){
+},{"../api/authorApi":210,"../constants/actionTypes":227,"../dispatcher/appDispatcher":228}],210:[function(require,module,exports){
 //mock api to mimick accessing of a server
 "use strict";
 
@@ -51378,7 +51378,7 @@ var AuthorPage = React.createClass({displayName: "AuthorPage",
 
 module.exports = AuthorPage;
 
-},{"../../actions/authorActions":209,"../../stores/authorStore":228,"./authorList":216,"react":205,"react-router":35}],218:[function(require,module,exports){
+},{"../../actions/authorActions":209,"../../stores/authorStore":231,"./authorList":216,"react":205,"react-router":35}],218:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -51445,11 +51445,11 @@ var ManageAuthorPage = React.createClass({displayName: "ManageAuthorPage",
         this.state.errors = {};
 
         if (this.state.author.firstName.length < 3) {
-            this.state.errors.firstName = 'First Name must be at east 3 characters';
+            this.state.errors.firstName = 'First Name must be at least 3 characters';
             formIsValid = false;
         }
         if (this.state.author.lastName.length < 3) {
-            this.state.errors.lastName = 'Last Name must be at east 3 characters';
+            this.state.errors.lastName = 'Last Name must be at least 3 characters';
             formIsValid = false;
         }
         
@@ -51487,7 +51487,7 @@ var ManageAuthorPage = React.createClass({displayName: "ManageAuthorPage",
 
 module.exports = ManageAuthorPage;
 
-},{"../../actions/authorActions":209,"../../stores/authorStore":228,"../common/helperFunctions":220,"./authorForm":215,"react":205,"react-router":35,"toastr":206}],219:[function(require,module,exports){
+},{"../../actions/authorActions":209,"../../stores/authorStore":231,"../common/helperFunctions":220,"./authorForm":215,"react":205,"react-router":35,"toastr":206}],219:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -51503,7 +51503,7 @@ var Header = React.createClass({displayName: "Header",
                         React.createElement("li", null, React.createElement(Link, {to: "app"}, "Home")), 
                         React.createElement("li", null, React.createElement(Link, {to: "authors"}, "Authors")), 
                         React.createElement("li", null, React.createElement(Link, {to: "about"}, "About")), 
-                        React.createElement("li", null, React.createElement(Link, {to: "extra"}, "Extra"))
+                        React.createElement("li", null, React.createElement(Link, {to: "dnd"}, "DnD"))
                     )
                 )
             )
@@ -51570,17 +51570,93 @@ module.exports = Input;
 },{"react":205}],222:[function(require,module,exports){
 "use strict";
 var React = require('react');
+var Router = require('react-router');
+var Link = Router.Link;
+var LoginForm = require('./loginForm');
+var toastr = require('toastr');
+var Helper = require('../common/helperFunctions');
+
 $ = jQuery = require('jquery');
 
-var ExtraPage = React.createClass({displayName: "ExtraPage",
+
+var dndLoginPage = React.createClass({displayName: "dndLoginPage",
+    mixins: [
+        Router.Navigation
+    ],
+
+    statics: {
+        willTransitionFrom: function(transition, component) {
+            if (component.state.dirty && !confirm('Leave without saving?')) {
+                transition.abort();
+            }
+        }
+    },
+
+    setCharacterState: function(event) {
+        this.setState({dirty: true});
+        var field = event.target.name;
+        var value = event.target.value;
+        this.state.character[field] = value;
+        return this.setState({character: this.state.character});
+    },
+
+    getInitialState: function() {
+        return {
+            character: { id: '', charName: '', password: '' },
+            errors: {},
+            dirty: false
+        };
+    },
+
+    characterFormIsValid: function() {
+        var formIsValid = true;
+        this.state.errors = {};
+
+        if (this.state.character.charName.length < 2) {
+            this.state.errors.charName = 'Character Name must be at least 2 characters';
+            formIsValid = false;
+        }
+        if (this.state.character.password.length < 3) {
+            this.state.errors.password = 'Password must be at least 3 characters';
+            formIsValid = false;
+        }
+        
+        if (Helper.hasNumber(this.state.character.charName)) {
+            this.state.errors.charName = "Name can't consist of numbers";
+            formIsValid = false;
+        }
+        // Check if Login Details are valid.
+
+        this.setState({errors: this.state.errors});
+        return formIsValid;
+    },
+
+    loginToCharacter: function(event) {
+        event.preventDefault();
+
+        if (!this.characterFormIsValid()) {
+            console.log(this.state.errors);
+            return;
+        }
+        
+        toastr.success('Login Successful!');
+        this.transitionTo('dnd');
+        this.setState({dirty: false});
+
+    },
+
     render: function() {
         return (
             React.createElement("div", {className: "container-fluid"}, 
                 React.createElement("h1", {className: "text-center"}, "Dungeons and Dragons Character Sheet"), 
                 React.createElement("div", {className: "row"}, 
                     React.createElement("div", {className: "col-sm-12 text-center"}, 
-                        React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Login to Existing Character"), 
-                        React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Create new Character")
+                        React.createElement(Link, {to: "login"}, React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Login to Existing Character")), 
+                        React.createElement(LoginForm, {
+                            character: this.state.character, 
+                            onChange: this.setCharacterState, 
+                            onSave: this.loginToCharacter, 
+                            errors: this.state.errors})
                     )
                 )
             )
@@ -51588,9 +51664,95 @@ var ExtraPage = React.createClass({displayName: "ExtraPage",
     }
 });
 
-module.exports = ExtraPage;
+module.exports = dndLoginPage;
 
-},{"jquery":7,"react":205}],223:[function(require,module,exports){
+},{"../common/helperFunctions":220,"./loginForm":225,"jquery":7,"react":205,"react-router":35,"toastr":206}],223:[function(require,module,exports){
+"use strict";
+var React = require('react');
+var Router = require('react-router');
+var Link = Router.Link;
+$ = jQuery = require('jquery');
+
+var dndSetupPage = React.createClass({displayName: "dndSetupPage",
+    render: function() {
+        return (
+            React.createElement("div", {className: "container-fluid"}, 
+                React.createElement("h1", {className: "text-center"}, "Dungeons and Dragons Character Sheet"), 
+                React.createElement("div", {className: "row"}, 
+                    React.createElement("div", {className: "col-sm-12 text-center"}, 
+                        React.createElement(Link, {to: "setup"}, React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Create new Character"))
+                    )
+                )
+            )
+        );
+    }
+});
+
+module.exports = dndSetupPage;
+
+},{"jquery":7,"react":205,"react-router":35}],224:[function(require,module,exports){
+"use strict";
+var React = require('react');
+var Router = require('react-router');
+var Link = Router.Link;
+$ = jQuery = require('jquery');
+
+var dndStartPage = React.createClass({displayName: "dndStartPage",
+    render: function() {
+        return (
+            React.createElement("div", {className: "container-fluid"}, 
+                React.createElement("h1", {className: "text-center"}, "Dungeons and Dragons Character Sheet"), 
+                React.createElement("div", {className: "row"}, 
+                    React.createElement("div", {className: "col-sm-12 text-center"}, 
+                        React.createElement(Link, {to: "login"}, React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Login to Existing Character")), 
+                        React.createElement(Link, {to: "setup"}, React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Create new Character"))
+                    )
+                )
+            )
+        );
+    }
+});
+
+module.exports = dndStartPage;
+
+},{"jquery":7,"react":205,"react-router":35}],225:[function(require,module,exports){
+"use strict";
+
+var React = require('react');
+var Input = require('../common/textInput');
+
+var LoginForm = React.createClass({displayName: "LoginForm",
+    propTypes: {
+        character: React.PropTypes.object.isRequired,
+        onSave: React.PropTypes.func.isRequired,
+        onChange: React.PropTypes.func.isRequired,
+        errors: React.PropTypes.object
+    },
+
+    render: function() {
+        return (
+            React.createElement("form", null, 
+                React.createElement(Input, {
+                    name: "charName", 
+                    label: "Character Name", 
+                    value: this.props.character.charName, 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.charName}), 
+                React.createElement(Input, {
+                    name: "password", 
+                    label: "Password", 
+                    value: this.props.character.password, 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.password}), 
+                React.createElement("input", {type: "submit", value: "Save", onClick: this.props.onSave, className: "btn btn-default"})
+            )
+        );
+    }
+});
+
+module.exports = LoginForm;
+
+},{"../common/textInput":221,"react":205}],226:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -51610,7 +51772,7 @@ var Home = React.createClass({displayName: "Home",
 
 module.exports = Home;
 
-},{"react":205,"react-router":35}],224:[function(require,module,exports){
+},{"react":205,"react-router":35}],227:[function(require,module,exports){
 "use strict";
 
 var keyMirror = require('react/lib/keyMirror');
@@ -51622,11 +51784,11 @@ module.exports = keyMirror({
 	DELETE_AUTHOR: null
 });
 
-},{"react/lib/keyMirror":190}],225:[function(require,module,exports){
+},{"react/lib/keyMirror":190}],228:[function(require,module,exports){
 var Dispatcher = require('flux').Dispatcher;
 module.exports = new Dispatcher();
 
-},{"flux":4}],226:[function(require,module,exports){
+},{"flux":4}],229:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -51639,7 +51801,7 @@ Router.run(routes, /*Router.HistoryLocation,*/function(Handler) {
     React.render(React.createElement(Handler, null), document.getElementById('app'));
 });
 
-},{"./actions/InitializeActions":208,"./routes":227,"react":205,"react-router":35}],227:[function(require,module,exports){
+},{"./actions/InitializeActions":208,"./routes":230,"react":205,"react-router":35}],230:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -51655,14 +51817,16 @@ var routes = (
         React.createElement(Route, {name: "addAuthor", path: "author", handler: require('./components/authors/manageAuthorPage')}), 
         React.createElement(Route, {name: "manageAuthor", path: "author/:id", handler: require('./components/authors/manageAuthorPage')}), 
         React.createElement(Route, {name: "about", handler: require('./components/about/aboutPage')}), 
-        React.createElement(Route, {name: "extra", handler: require('./components/extra/extraPage')}), 
+        React.createElement(Route, {name: "dnd", handler: require('./components/extra/dndStartPage')}), 
+        React.createElement(Route, {name: "login", path: "dnd/login", handler: require('./components/extra/dndLoginPage')}), 
+        React.createElement(Route, {name: "setup", path: "dnd/setup", handler: require('./components/extra/dndSetupPage')}), 
         React.createElement(NotFoundRoute, {handler: require('./components/404Page')})
     )
 );
 
 module.exports = routes;
 
-},{"./components/404Page":212,"./components/about/aboutPage":213,"./components/app":214,"./components/authors/authorPage":217,"./components/authors/manageAuthorPage":218,"./components/extra/extraPage":222,"./components/homePage":223,"react":205,"react-router":35}],228:[function(require,module,exports){
+},{"./components/404Page":212,"./components/about/aboutPage":213,"./components/app":214,"./components/authors/authorPage":217,"./components/authors/manageAuthorPage":218,"./components/extra/dndLoginPage":222,"./components/extra/dndSetupPage":223,"./components/extra/dndStartPage":224,"./components/homePage":226,"react":205,"react-router":35}],231:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require('../dispatcher/appDispatcher');
@@ -51724,4 +51888,4 @@ Dispatcher.register(function(action) {
 
 module.exports = AuthorStore;
 
-},{"../constants/actionTypes":224,"../dispatcher/appDispatcher":225,"events":2,"lodash":8,"object-assign":9}]},{},[226]);
+},{"../constants/actionTypes":227,"../dispatcher/appDispatcher":228,"events":2,"lodash":8,"object-assign":9}]},{},[229]);
