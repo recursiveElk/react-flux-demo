@@ -50570,7 +50570,7 @@ module.exports = require('./lib/React');
 },{"./lib/React":78}],206:[function(require,module,exports){
 /*
  * Toastr
- * Copyright 2012-2015
+ * Copyright 2012-2014 
  * Authors: John Papa, Hans Fjällemark, and Tim Ferrell.
  * All Rights Reserved.
  * Use, reproduction, distribution, and modification of this code is subject to the terms and
@@ -50580,7 +50580,6 @@ module.exports = require('./lib/React');
  *
  * Project: https://github.com/CodeSeven/toastr
  */
-/* global define */
 ; (function (define) {
     define(['jquery'], function ($) {
         return (function () {
@@ -50603,7 +50602,7 @@ module.exports = require('./lib/React');
                 options: {},
                 subscribe: subscribe,
                 success: success,
-                version: '2.1.2',
+                version: '2.1.0',
                 warning: warning
             };
 
@@ -50611,8 +50610,7 @@ module.exports = require('./lib/React');
 
             return toastr;
 
-            ////////////////
-
+            //#region Accessible Methods
             function error(message, title, optionsOverride) {
                 return notify({
                     type: toastType.error,
@@ -50669,10 +50667,10 @@ module.exports = require('./lib/React');
                 });
             }
 
-            function clear($toastElement, clearOptions) {
+            function clear($toastElement) {
                 var options = getOptions();
                 if (!$container) { getContainer(options); }
-                if (!clearToast($toastElement, options, clearOptions)) {
+                if (!clearToast($toastElement, options)) {
                     clearContainer(options);
                 }
             }
@@ -50688,8 +50686,9 @@ module.exports = require('./lib/React');
                     $container.remove();
                 }
             }
+            //#endregion
 
-            // internal functions
+            //#region Internal Methods
 
             function clearContainer (options) {
                 var toastsToClear = $container.children();
@@ -50698,9 +50697,8 @@ module.exports = require('./lib/React');
                 }
             }
 
-            function clearToast ($toastElement, options, clearOptions) {
-                var force = clearOptions && clearOptions.force ? clearOptions.force : false;
-                if ($toastElement && (force || $(':focus', $toastElement).length === 0)) {
+            function clearToast ($toastElement, options) {
+                if ($toastElement && $(':focus', $toastElement).length === 0) {
                     $toastElement[options.hideMethod]({
                         duration: options.hideDuration,
                         easing: options.hideEasing,
@@ -50737,9 +50735,6 @@ module.exports = require('./lib/React');
                     hideDuration: 1000,
                     hideEasing: 'swing',
                     onHidden: undefined,
-                    closeMethod: false,
-                    closeDuration: false,
-                    closeEasing: false,
 
                     extendedTimeOut: 1000,
                     iconClasses: {
@@ -50753,9 +50748,8 @@ module.exports = require('./lib/React');
                     timeOut: 5000, // Set timeOut and extendedTimeOut to 0 to make it sticky
                     titleClass: 'toast-title',
                     messageClass: 'toast-message',
-                    escapeHtml: false,
                     target: 'body',
-                    closeHtml: '<button type="button">&times;</button>',
+                    closeHtml: '<button>&times;</button>',
                     newestOnTop: true,
                     preventDuplicates: false,
                     progressBar: false
@@ -50768,44 +50762,109 @@ module.exports = require('./lib/React');
             }
 
             function notify(map) {
-                var options = getOptions();
-                var iconClass = map.iconClass || options.iconClass;
+                var options = getOptions(),
+                    iconClass = map.iconClass || options.iconClass;
+
+                if (options.preventDuplicates) {
+                    if (map.message === previousToast) {
+                        return;
+                    } else {
+                        previousToast = map.message;
+                    }
+                }
 
                 if (typeof (map.optionsOverride) !== 'undefined') {
                     options = $.extend(options, map.optionsOverride);
                     iconClass = map.optionsOverride.iconClass || iconClass;
                 }
 
-                if (shouldExit(options, map)) { return; }
-
                 toastId++;
 
                 $container = getContainer(options, true);
+                var intervalId = null,
+                    $toastElement = $('<div/>'),
+                    $titleElement = $('<div/>'),
+                    $messageElement = $('<div/>'),
+                    $progressElement = $('<div/>'),
+                    $closeElement = $(options.closeHtml),
+                    progressBar = {
+                        intervalId: null,
+                        hideEta: null,
+                        maxHideTime: null
+                    },
+                    response = {
+                        toastId: toastId,
+                        state: 'visible',
+                        startTime: new Date(),
+                        options: options,
+                        map: map
+                    };
 
-                var intervalId = null;
-                var $toastElement = $('<div/>');
-                var $titleElement = $('<div/>');
-                var $messageElement = $('<div/>');
-                var $progressElement = $('<div/>');
-                var $closeElement = $(options.closeHtml);
-                var progressBar = {
-                    intervalId: null,
-                    hideEta: null,
-                    maxHideTime: null
-                };
-                var response = {
-                    toastId: toastId,
-                    state: 'visible',
-                    startTime: new Date(),
-                    options: options,
-                    map: map
-                };
+                if (map.iconClass) {
+                    $toastElement.addClass(options.toastClass).addClass(iconClass);
+                }
 
-                personalizeToast();
+                if (map.title) {
+                    $titleElement.append(map.title).addClass(options.titleClass);
+                    $toastElement.append($titleElement);
+                }
 
-                displayToast();
+                if (map.message) {
+                    $messageElement.append(map.message).addClass(options.messageClass);
+                    $toastElement.append($messageElement);
+                }
 
-                handleEvents();
+                if (options.closeButton) {
+                    $closeElement.addClass('toast-close-button').attr('role', 'button');
+                    $toastElement.prepend($closeElement);
+                }
+
+                if (options.progressBar) {
+                    $progressElement.addClass('toast-progress');
+                    $toastElement.prepend($progressElement);
+                }
+
+                $toastElement.hide();
+                if (options.newestOnTop) {
+                    $container.prepend($toastElement);
+                } else {
+                    $container.append($toastElement);
+                }
+                $toastElement[options.showMethod](
+                    {duration: options.showDuration, easing: options.showEasing, complete: options.onShown}
+                );
+
+                if (options.timeOut > 0) {
+                    intervalId = setTimeout(hideToast, options.timeOut);
+                    progressBar.maxHideTime = parseFloat(options.timeOut);
+                    progressBar.hideEta = new Date().getTime() + progressBar.maxHideTime;
+                    if (options.progressBar) {
+                        progressBar.intervalId = setInterval(updateProgress, 10);
+                    }
+                }
+
+                $toastElement.hover(stickAround, delayedHideToast);
+                if (!options.onclick && options.tapToDismiss) {
+                    $toastElement.click(hideToast);
+                }
+
+                if (options.closeButton && $closeElement) {
+                    $closeElement.click(function (event) {
+                        if (event.stopPropagation) {
+                            event.stopPropagation();
+                        } else if (event.cancelBubble !== undefined && event.cancelBubble !== true) {
+                            event.cancelBubble = true;
+                        }
+                        hideToast(true);
+                    });
+                }
+
+                if (options.onclick) {
+                    $toastElement.click(function () {
+                        options.onclick();
+                        hideToast();
+                    });
+                }
 
                 publish(response);
 
@@ -50815,134 +50874,14 @@ module.exports = require('./lib/React');
 
                 return $toastElement;
 
-                function escapeHtml(source) {
-                    if (source == null)
-                        source = "";
-
-                    return new String(source)
-                        .replace(/&/g, '&amp;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#39;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;');
-                }
-
-                function personalizeToast() {
-                    setIcon();
-                    setTitle();
-                    setMessage();
-                    setCloseButton();
-                    setProgressBar();
-                    setSequence();
-                }
-
-                function handleEvents() {
-                    $toastElement.hover(stickAround, delayedHideToast);
-                    if (!options.onclick && options.tapToDismiss) {
-                        $toastElement.click(hideToast);
-                    }
-
-                    if (options.closeButton && $closeElement) {
-                        $closeElement.click(function (event) {
-                            if (event.stopPropagation) {
-                                event.stopPropagation();
-                            } else if (event.cancelBubble !== undefined && event.cancelBubble !== true) {
-                                event.cancelBubble = true;
-                            }
-                            hideToast(true);
-                        });
-                    }
-
-                    if (options.onclick) {
-                        $toastElement.click(function (event) {
-                            options.onclick(event);
-                            hideToast();
-                        });
-                    }
-                }
-
-                function displayToast() {
-                    $toastElement.hide();
-
-                    $toastElement[options.showMethod](
-                        {duration: options.showDuration, easing: options.showEasing, complete: options.onShown}
-                    );
-
-                    if (options.timeOut > 0) {
-                        intervalId = setTimeout(hideToast, options.timeOut);
-                        progressBar.maxHideTime = parseFloat(options.timeOut);
-                        progressBar.hideEta = new Date().getTime() + progressBar.maxHideTime;
-                        if (options.progressBar) {
-                            progressBar.intervalId = setInterval(updateProgress, 10);
-                        }
-                    }
-                }
-
-                function setIcon() {
-                    if (map.iconClass) {
-                        $toastElement.addClass(options.toastClass).addClass(iconClass);
-                    }
-                }
-
-                function setSequence() {
-                    if (options.newestOnTop) {
-                        $container.prepend($toastElement);
-                    } else {
-                        $container.append($toastElement);
-                    }
-                }
-
-                function setTitle() {
-                    if (map.title) {
-                        $titleElement.append(!options.escapeHtml ? map.title : escapeHtml(map.title)).addClass(options.titleClass);
-                        $toastElement.append($titleElement);
-                    }
-                }
-
-                function setMessage() {
-                    if (map.message) {
-                        $messageElement.append(!options.escapeHtml ? map.message : escapeHtml(map.message)).addClass(options.messageClass);
-                        $toastElement.append($messageElement);
-                    }
-                }
-
-                function setCloseButton() {
-                    if (options.closeButton) {
-                        $closeElement.addClass('toast-close-button').attr('role', 'button');
-                        $toastElement.prepend($closeElement);
-                    }
-                }
-
-                function setProgressBar() {
-                    if (options.progressBar) {
-                        $progressElement.addClass('toast-progress');
-                        $toastElement.prepend($progressElement);
-                    }
-                }
-
-                function shouldExit(options, map) {
-                    if (options.preventDuplicates) {
-                        if (map.message === previousToast) {
-                            return true;
-                        } else {
-                            previousToast = map.message;
-                        }
-                    }
-                    return false;
-                }
-
                 function hideToast(override) {
-                    var method = override && options.closeMethod !== false ? options.closeMethod : options.hideMethod;
-                    var duration = override && options.closeDuration !== false ?
-                        options.closeDuration : options.hideDuration;
-                    var easing = override && options.closeEasing !== false ? options.closeEasing : options.hideEasing;
                     if ($(':focus', $toastElement).length && !override) {
                         return;
                     }
                     clearTimeout(progressBar.intervalId);
-                    return $toastElement[method]({
-                        duration: duration,
-                        easing: easing,
+                    return $toastElement[options.hideMethod]({
+                        duration: options.hideDuration,
+                        easing: options.hideEasing,
                         complete: function () {
                             removeToast($toastElement);
                             if (options.onHidden && response.state !== 'hidden') {
@@ -50990,9 +50929,9 @@ module.exports = require('./lib/React');
                 $toastElement = null;
                 if ($container.children().length === 0) {
                     $container.remove();
-                    previousToast = undefined;
                 }
             }
+            //#endregion
 
         })();
     });
@@ -51000,7 +50939,7 @@ module.exports = require('./lib/React');
     if (typeof module !== 'undefined' && module.exports) { //Node
         module.exports = factory(require('jquery'));
     } else {
-        window.toastr = factory(window.jQuery);
+        window['toastr'] = factory(window['jQuery']);
     }
 }));
 
@@ -51043,7 +50982,7 @@ var AuthorActions = {
 
 module.exports = AuthorActions;
 
-},{"../api/authorApi":210,"../constants/actionTypes":227,"../dispatcher/appDispatcher":228}],208:[function(require,module,exports){
+},{"../api/authorApi":210,"../constants/actionTypes":228,"../dispatcher/appDispatcher":229}],208:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require('../dispatcher/appDispatcher');
@@ -51063,7 +51002,7 @@ var InitializeActions = {
 
 module.exports = InitializeActions;
 
-},{"../api/authorApi":210,"../constants/actionTypes":227,"../dispatcher/appDispatcher":228}],209:[function(require,module,exports){
+},{"../api/authorApi":210,"../constants/actionTypes":228,"../dispatcher/appDispatcher":229}],209:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require('../dispatcher/appDispatcher');
@@ -51102,7 +51041,7 @@ var AuthorActions = {
 
 module.exports = AuthorActions;
 
-},{"../api/authorApi":210,"../constants/actionTypes":227,"../dispatcher/appDispatcher":228}],210:[function(require,module,exports){
+},{"../api/authorApi":210,"../constants/actionTypes":228,"../dispatcher/appDispatcher":229}],210:[function(require,module,exports){
 //mock api to mimick accessing of a server
 "use strict";
 
@@ -51378,7 +51317,7 @@ var AuthorPage = React.createClass({displayName: "AuthorPage",
 
 module.exports = AuthorPage;
 
-},{"../../actions/authorActions":209,"../../stores/authorStore":231,"./authorList":216,"react":205,"react-router":35}],218:[function(require,module,exports){
+},{"../../actions/authorActions":209,"../../stores/authorStore":232,"./authorList":216,"react":205,"react-router":35}],218:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -51487,7 +51426,7 @@ var ManageAuthorPage = React.createClass({displayName: "ManageAuthorPage",
 
 module.exports = ManageAuthorPage;
 
-},{"../../actions/authorActions":209,"../../stores/authorStore":231,"../common/helperFunctions":220,"./authorForm":215,"react":205,"react-router":35,"toastr":206}],219:[function(require,module,exports){
+},{"../../actions/authorActions":209,"../../stores/authorStore":232,"../common/helperFunctions":220,"./authorForm":215,"react":205,"react-router":35,"toastr":206}],219:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -51671,16 +51610,89 @@ module.exports = dndLoginPage;
 var React = require('react');
 var Router = require('react-router');
 var Link = Router.Link;
+var SetupForm = require('./setupForm');
+var toastr = require('toastr');
 $ = jQuery = require('jquery');
+var Helper = require('../common/helperFunctions');
 
 var dndSetupPage = React.createClass({displayName: "dndSetupPage",
+    mixins: [
+        Router.Navigation
+    ],
+
+    statics: {
+        willTransitionFrom: function(transition, component) {
+            if (component.state.dirty && !confirm('Leave without saving?')) {
+                transition.abort();
+            }
+        }
+    },
+
+    getInitialState: function() {
+        return {
+            character: { id: '', charName: '', password: '', detail1: '', detail2: '', detail3: '' },
+            errors: {},
+            dirty: false
+        };
+    },
+    
+    setCharacterState: function(event) {
+        this.setState({dirty: true});
+        var field = event.target.name;
+        var value = event.target.value;
+        this.state.character[field] = value;
+        return this.setState({character: this.state.character});
+    },
+    
+    characterFormIsValid: function() {
+        var formIsValid = true;
+        this.state.errors = {};
+
+        if (this.state.character.charName.length < 2) {
+            this.state.errors.charName = 'Character Name must be at least 2 characters';
+            formIsValid = false;
+        }
+        if (this.state.character.password.length < 3) {
+            this.state.errors.password = 'Password must be at least 3 characters';
+            formIsValid = false;
+        }
+        if (Helper.hasNumber(this.state.character.charName)) {
+            this.state.errors.charName = "Name can't consist of numbers";
+            formIsValid = false;
+        }
+
+        //Save Character Here
+
+        this.setState({errors: this.state.errors});
+        return formIsValid;
+    },
+
+    setupCharacter: function(event) {
+        event.preventDefault();
+
+        if (!this.characterFormIsValid()) {
+            console.log(this.state.errors);
+            return;
+        }
+        
+        toastr.success('Login Successful!');
+        this.transitionTo('dnd');
+        this.setState({dirty: false});
+
+    },
+
     render: function() {
         return (
             React.createElement("div", {className: "container-fluid"}, 
                 React.createElement("h1", {className: "text-center"}, "Dungeons and Dragons Character Sheet"), 
                 React.createElement("div", {className: "row"}, 
                     React.createElement("div", {className: "col-sm-12 text-center"}, 
-                        React.createElement(Link, {to: "setup"}, React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Create new Character"))
+                        React.createElement(Link, {to: "setup"}, React.createElement("button", {className: "charButton btn btn-primary btn-lg", href: ""}, "Create new Character")), 
+                        React.createElement(SetupForm, {
+                            character: this.state.character, 
+                            onChange: this.setCharacterState, 
+                            onSave: this.setupCharacter, 
+                            errors: this.state.errors})
                     )
                 )
             )
@@ -51690,7 +51702,7 @@ var dndSetupPage = React.createClass({displayName: "dndSetupPage",
 
 module.exports = dndSetupPage;
 
-},{"jquery":7,"react":205,"react-router":35}],224:[function(require,module,exports){
+},{"../common/helperFunctions":220,"./setupForm":226,"jquery":7,"react":205,"react-router":35,"toastr":206}],224:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -51720,6 +51732,8 @@ module.exports = dndStartPage;
 
 var React = require('react');
 var Input = require('../common/textInput');
+var Router = require('react-router');
+var Link = require('react-router').Link;
 
 var LoginForm = React.createClass({displayName: "LoginForm",
     propTypes: {
@@ -51744,7 +51758,10 @@ var LoginForm = React.createClass({displayName: "LoginForm",
                     value: this.props.character.password, 
                     onChange: this.props.onChange, 
                     error: this.props.errors.password}), 
-                React.createElement("input", {type: "submit", value: "Save", onClick: this.props.onSave, className: "btn btn-default"})
+                React.createElement("div", {className: "row"}, 
+                    React.createElement(Link, {to: "dnd", className: "navButton btn btn-default"}, "Back"), 
+                    React.createElement("input", {type: "submit", value: "Save", onClick: this.props.onSave, className: "btn btn-default"})
+                )
             )
         );
     }
@@ -51752,7 +51769,67 @@ var LoginForm = React.createClass({displayName: "LoginForm",
 
 module.exports = LoginForm;
 
-},{"../common/textInput":221,"react":205}],226:[function(require,module,exports){
+},{"../common/textInput":221,"react":205,"react-router":35}],226:[function(require,module,exports){
+"use strict";
+
+var React = require('react');
+var Input = require('../common/textInput');
+var Router = require('react-router');
+var Link = require('react-router').Link;
+
+var SetupForm = React.createClass({displayName: "SetupForm",
+    propTypes: {
+        character: React.PropTypes.object.isRequired,
+        onSave: React.PropTypes.func.isRequired,
+        onChange: React.PropTypes.func.isRequired,
+        errors: React.PropTypes.object
+    },
+
+    render: function() {
+        return (
+            React.createElement("form", null, 
+                React.createElement(Input, {
+                    name: "charName", 
+                    label: "Character Name", 
+                    value: this.props.character.charName, 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.charName}), 
+                React.createElement(Input, {
+                    name: "password", 
+                    label: "Password", 
+                    value: this.props.character.password, 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.password}), 
+                React.createElement(Input, {
+                    name: "detail1", 
+                    label: "Detail 1", 
+                    value: this.props.character.detail1, 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.detail1}), 
+                React.createElement(Input, {
+                    name: "detail2", 
+                    label: "Detail 2", 
+                    value: this.props.character.detail2, 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.detail2}), 
+                React.createElement(Input, {
+                    name: "detail3", 
+                    label: "Detail 3", 
+                    value: this.props.character.detail3, 
+                    onChange: this.props.onChange, 
+                    error: this.props.errors.detail3}), 
+                React.createElement("div", {className: "row"}, 
+                    React.createElement(Link, {to: "dnd", className: "navButton btn btn-default"}, "Back"), 
+                    React.createElement("input", {type: "submit", value: "Save", onClick: this.props.onSave, className: "btn btn-default"})
+                )
+            )
+        );
+    }
+});
+
+module.exports = SetupForm;
+
+},{"../common/textInput":221,"react":205,"react-router":35}],227:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -51772,7 +51849,7 @@ var Home = React.createClass({displayName: "Home",
 
 module.exports = Home;
 
-},{"react":205,"react-router":35}],227:[function(require,module,exports){
+},{"react":205,"react-router":35}],228:[function(require,module,exports){
 "use strict";
 
 var keyMirror = require('react/lib/keyMirror');
@@ -51784,11 +51861,11 @@ module.exports = keyMirror({
 	DELETE_AUTHOR: null
 });
 
-},{"react/lib/keyMirror":190}],228:[function(require,module,exports){
+},{"react/lib/keyMirror":190}],229:[function(require,module,exports){
 var Dispatcher = require('flux').Dispatcher;
 module.exports = new Dispatcher();
 
-},{"flux":4}],229:[function(require,module,exports){
+},{"flux":4}],230:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Router = require('react-router');
@@ -51801,7 +51878,7 @@ Router.run(routes, /*Router.HistoryLocation,*/function(Handler) {
     React.render(React.createElement(Handler, null), document.getElementById('app'));
 });
 
-},{"./actions/InitializeActions":208,"./routes":230,"react":205,"react-router":35}],230:[function(require,module,exports){
+},{"./actions/InitializeActions":208,"./routes":231,"react":205,"react-router":35}],231:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -51826,7 +51903,7 @@ var routes = (
 
 module.exports = routes;
 
-},{"./components/404Page":212,"./components/about/aboutPage":213,"./components/app":214,"./components/authors/authorPage":217,"./components/authors/manageAuthorPage":218,"./components/extra/dndLoginPage":222,"./components/extra/dndSetupPage":223,"./components/extra/dndStartPage":224,"./components/homePage":226,"react":205,"react-router":35}],231:[function(require,module,exports){
+},{"./components/404Page":212,"./components/about/aboutPage":213,"./components/app":214,"./components/authors/authorPage":217,"./components/authors/manageAuthorPage":218,"./components/extra/dndLoginPage":222,"./components/extra/dndSetupPage":223,"./components/extra/dndStartPage":224,"./components/homePage":227,"react":205,"react-router":35}],232:[function(require,module,exports){
 "use strict";
 
 var Dispatcher = require('../dispatcher/appDispatcher');
@@ -51888,4 +51965,4 @@ Dispatcher.register(function(action) {
 
 module.exports = AuthorStore;
 
-},{"../constants/actionTypes":227,"../dispatcher/appDispatcher":228,"events":2,"lodash":8,"object-assign":9}]},{},[229]);
+},{"../constants/actionTypes":228,"../dispatcher/appDispatcher":229,"events":2,"lodash":8,"object-assign":9}]},{},[230]);

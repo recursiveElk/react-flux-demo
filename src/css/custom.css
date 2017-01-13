@@ -1,5 +1,11 @@
 .charButton {
     width: 300px;
-    margin: 20px;
-    margin-top: 40px;
+    margin: 2vw;
+    margin-top: 3vw;
+    margin-bottom: 3vw;
+}
+
+.navButton {
+    /*margin-top: 2vw;*/
+    margin-right: 1.4vw;
 }
